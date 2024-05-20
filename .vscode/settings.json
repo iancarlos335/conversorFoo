@@ -3,6 +3,10 @@
     "iosfwd": "cpp",
     "new": "cpp",
     "cstddef": "cpp",
-    "fstream": "cpp"
+    "fstream": "cpp",
+    "memory": "cpp",
+    "istream": "cpp",
+    "functional": "cpp",
+    "*.tcc": "cpp"
   }
 }
