@@ -8,14 +8,12 @@
 #include <fstream>
 using namespace std;
 
-void pegarMaximoNumeroDeLinhasEColunas(ifstream arquivoDeLeitura, int *matrizInfo)
+void pegarMaximoNumeroDeLinhasEColunas(ifstream *arquivoDeLeitura, int *matrizInfo)
 {
     char caractere;
-    string linha;
-    int matrizInfo[2]; // primeira dimensão é o número de linhas, segunda é o número de colunas
     int maiorNumeroColunas = 0;
 
-    while (arquivoDeLeitura >> caractere)
+    while (arquivoDeLeitura->get(caractere))
     {
         matrizInfo[1]++;
 
@@ -27,16 +25,18 @@ void pegarMaximoNumeroDeLinhasEColunas(ifstream arquivoDeLeitura, int *matrizInf
         }
     }
 
-    arquivoDeLeitura.close();
+    arquivoDeLeitura->close();
 }
 
 void lerConteudoDoArquivoOrigem(string nomeArquivo, int **matrizPixels)
 {
     unsigned char caractere;
     int numeroLinha = 0;
-    int matrizInfo[2];
+    int matrizInfo[2] = {1, 1}; // primeira dimensão é o número de linhas, a segunda é o número de colunas
 
     ifstream arquivoDeLeitura(nomeArquivo, ios::binary);
+
+    pegarMaximoNumeroDeLinhasEColunas(&arquivoDeLeitura, matrizInfo);
 
     matrizPixels = new int *[matrizInfo[0]];
 
@@ -54,8 +54,6 @@ void lerConteudoDoArquivoOrigem(string nomeArquivo, int **matrizPixels)
             cout << (int)caractere << ' ';
         }
     }
-
-    int **matrizPixels = new int *[matrizInfo[0]];
 
     for (int i = 0; i < matrizInfo[0]; i++)
     {
