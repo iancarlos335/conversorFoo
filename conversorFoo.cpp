@@ -8,39 +8,51 @@
 #include <fstream>
 using namespace std;
 
-void pegarMaximoNumeroDeLinhasEColunas(ifstream *arquivoDeLeitura, int *matrizInfo)
+void pegarNumeroDeLinhasEColunas(ifstream &arquivoDeLeitura, int matrizInfo[2])
 {
     char caractere;
-    int maiorNumeroColunas = 0;
+    string linha;
 
-    while (arquivoDeLeitura->get(caractere))
+    while (arquivoDeLeitura.read(&caractere, sizeof(char)))
     {
-        matrizInfo[1]++;
+        if (caractere != ' ')
+            linha += caractere;
+        else
+        {
+            matrizInfo[0] = std::stoi(linha);
+            linha = "";
+        }
 
         if (caractere == '\n')
         {
-            maiorNumeroColunas = matrizInfo[1] > maiorNumeroColunas ? matrizInfo[1] : maiorNumeroColunas;
-            matrizInfo[1] = 0;
-            matrizInfo[0]++;
+            matrizInfo[1] = std::stoi(linha);
+            break;
         }
     }
 
-    arquivoDeLeitura->close();
+    cout << "Numero de linhas: " << matrizInfo[0] << endl;
+    cout << "Numero de colunas: " << matrizInfo[1] << endl;
 }
 
-void lerConteudoDoArquivoOrigem(string nomeArquivo, int **matrizPixels)
+void lerConteudoDoArquivoOrigem(char *nomeArquivo, int **matrizPixels)
 {
     unsigned char caractere;
     int numeroLinha = 0;
-    int matrizInfo[2] = {1, 1}; // primeira dimensão é o número de linhas, a segunda é o número de colunas
+    int matrizInfo[2] = {0, 0}; // primeira dimensão é o número de linhas, a segunda é o número de colunas
 
     ifstream arquivoDeLeitura(nomeArquivo, ios::binary);
 
-    pegarMaximoNumeroDeLinhasEColunas(&arquivoDeLeitura, matrizInfo);
+    if (!arquivoDeLeitura)
+    {
+        std::cerr << "Erro abrindo o arquivo: " << nomeArquivo << std::endl;
+        exit(-1);
+    }
+
+    pegarNumeroDeLinhasEColunas(arquivoDeLeitura, matrizInfo);
 
     matrizPixels = new int *[matrizInfo[0]];
 
-    while (arquivoDeLeitura >> caractere)
+    while (!arquivoDeLeitura.eof())
     {
         if (numeroLinha == 0)
         {
@@ -61,15 +73,27 @@ void lerConteudoDoArquivoOrigem(string nomeArquivo, int **matrizPixels)
     }
 
     delete matrizPixels[matrizInfo[0]];
+
     arquivoDeLeitura.close();
 }
 
-int main()
+void escreverNoArquivoFinal(char *nomeArquivo, int **matrizPixels)
 {
-    string nomeArquivo = "exemplos/img0.foo";
+    ofstream arquivoDeEscrita(nomeArquivo, ios::binary);
+
+    arquivoDeEscrita.close();
+}
+
+int main(int argc, char *argv[])
+{
     int **matrizPixels;
 
+    char nomeArquivo[19] = "exemplos/img0.foo";
+
+    cout << nomeArquivo << endl;
     lerConteudoDoArquivoOrigem(nomeArquivo, matrizPixels);
+
+    escreverNoArquivoFinal(argv[2], matrizPixels);
 
     return 0;
 }
