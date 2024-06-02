@@ -38,10 +38,107 @@ void pegarNumeroDeLinhasEColunas(ifstream &arquivoDeLeitura, int matrizInfo[2])
     cout << "Numero de colunas: " << matrizInfo[1] << endl;
 }
 
-void lerConteudoDoArquivoOrigem(char *nomeArquivo, int **matrizPixels)
+void lerConteudoDoArquivoOrigem(ifstream &arquivoDeLeitura, int **&matrizPixels, int matrizInfo[2])
 {
+    unsigned char **matrizCaracteres;
+
+    matrizCaracteres = new unsigned char *[matrizInfo[0]];
+    for (int i = 0; i < matrizInfo[0]; i++)
+    {
+        matrizCaracteres[i] = new unsigned char[matrizInfo[1]];
+        arquivoDeLeitura.read((char *)matrizCaracteres[i], matrizInfo[1]);
+    }
+
+    matrizPixels = new int *[matrizInfo[0]];
+    for (int i = 0; i < matrizInfo[0]; i++)
+    {
+        matrizPixels[i] = new int[matrizInfo[1]];
+        for (int j = 0; j < matrizInfo[1]; j++)
+        {
+            matrizPixels[i][j] = (unsigned int)matrizCaracteres[i][j];
+        }
+        delete matrizCaracteres[i];
+    }
+    delete matrizCaracteres;
+
+    arquivoDeLeitura.close();
+}
+
+void balanceamentoDosCaracteresPorDensidade(int **&matrizPixels, int matrizInfo[2], char **&caracteresBalanceados)
+{
+    caracteresBalanceados = new char *[matrizInfo[0]];
+    for (int i = 0; i < matrizInfo[0]; i++)
+    {
+        caracteresBalanceados[i] = new char[matrizInfo[1]];
+        for (int j = 0; j < matrizInfo[1]; j++)
+        {
+            if (matrizPixels[i][j] <= 24)
+            {
+                caracteresBalanceados[i][j] = '$';
+            }
+            else if (matrizPixels[i][j] > 24 && matrizPixels[i][j] <= 48)
+            {
+                caracteresBalanceados[i][j] = '@';
+            }
+            else if (matrizPixels[i][j] > 48 && matrizPixels[i][j] <= 72)
+            {
+                caracteresBalanceados[i][j] = 'B';
+            }
+            else if (matrizPixels[i][j] > 72 && matrizPixels[i][j] <= 96)
+            {
+                caracteresBalanceados[i][j] = '%';
+            }
+            else if (matrizPixels[i][j] > 96 && matrizPixels[i][j] <= 120)
+            {
+                caracteresBalanceados[i][j] = '8';
+            }
+            else if (matrizPixels[i][j] > 120 && matrizPixels[i][j] <= 144)
+            {
+                caracteresBalanceados[i][j] = '&';
+            }
+            else if (matrizPixels[i][j] > 144 && matrizPixels[i][j] <= 168)
+            {
+                caracteresBalanceados[i][j] = 'W';
+            }
+            else if (matrizPixels[i][j] > 168 && matrizPixels[i][j] <= 192)
+            {
+                caracteresBalanceados[i][j] = 'M';
+            }
+            else if (matrizPixels[i][j] > 192 && matrizPixels[i][j] <= 216)
+            {
+                caracteresBalanceados[i][j] = '#';
+            }
+            else
+            {
+                caracteresBalanceados[i][j] = '*';
+            }
+        }
+        delete matrizPixels[i];
+    }
+    delete matrizPixels;
+}
+
+void escreverNoArquivoFinal(char *nomeArquivo, char **&caracteresBalanceados, int matrizInfo[2])
+{
+    ofstream arquivoDeEscrita(nomeArquivo, ios::binary);
+
+    for (int i = 0; i < matrizInfo[0]; i++)
+    {
+        arquivoDeEscrita.write(caracteresBalanceados[i], matrizInfo[1]);
+        delete caracteresBalanceados[i];
+    }
+    delete caracteresBalanceados;
+
+    arquivoDeEscrita.close();
+}
+
+int main(int argc, char *argv[])
+{
+    int **matrizPixels;
+    char **caracteresBalanceados;
     int matrizInfo[2] = {0, 0}; // primeira dimensão é o número de linhas, a segunda é o número de colunas
-    char **matrizCharacteres;
+    char nomeArquivo[19] = "exemplos/img0.foo";
+    char nomeArquivoResultado[19] = "exemplos/img7.foo";
 
     ifstream arquivoDeLeitura(nomeArquivo, ios::binary);
 
@@ -53,46 +150,11 @@ void lerConteudoDoArquivoOrigem(char *nomeArquivo, int **matrizPixels)
 
     pegarNumeroDeLinhasEColunas(arquivoDeLeitura, matrizInfo);
 
-    matrizCharacteres = new char *[matrizInfo[0]];
-    for (int i = 0; i < matrizInfo[0]; i++)
-    {
-        matrizCharacteres[i] = new char[matrizInfo[1]];
-        arquivoDeLeitura.read((char *)matrizCharacteres[i], matrizInfo[1]);
-    }
+    lerConteudoDoArquivoOrigem(arquivoDeLeitura, matrizPixels, matrizInfo);
 
-    matrizPixels = new int *[matrizInfo[0]];
-    for (int i = 0; i < matrizInfo[0]; i++)
-    {
-        matrizPixels[i] = new int[matrizInfo[1]];
-        for (int j = 0; j < matrizInfo[1]; j++)
-        {
-            matrizPixels[i][j] = (unsigned int)matrizCharacteres[i][j];
-        }
-        delete matrizCharacteres[i];
-    }
+    balanceamentoDosCaracteresPorDensidade(matrizPixels, matrizInfo, caracteresBalanceados);
 
-    delete matrizCharacteres;
-
-    arquivoDeLeitura.close();
-}
-
-void escreverNoArquivoFinal(char *nomeArquivo, int **matrizPixels)
-{
-    ofstream arquivoDeEscrita(nomeArquivo, ios::binary);
-
-    arquivoDeEscrita.close();
-}
-
-int main(int argc, char *argv[])
-{
-    int **matrizPixels;
-
-    char nomeArquivo[19] = "exemplos/img0.foo";
-
-    cout << nomeArquivo << endl;
-    lerConteudoDoArquivoOrigem(nomeArquivo, matrizPixels);
-
-    // escreverNoArquivoFinal(argv[2], matrizPixels);
+    escreverNoArquivoFinal(nomeArquivoResultado, caracteresBalanceados, matrizInfo);
 
     return 0;
 }
