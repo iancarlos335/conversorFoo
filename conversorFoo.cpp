@@ -13,7 +13,7 @@ void pegarNumeroDeLinhasEColunas(ifstream &arquivoDeLeitura, int matrizInfo[2])
     char linhaCompleta[9];
     string buffer = "";
 
-    arquivoDeLeitura.read((char *)&linhaCompleta, 50);
+    arquivoDeLeitura.read((char *)&linhaCompleta, 9);
     for (int i = 0; i < 9; i++)
     {
         if (linhaCompleta[i] != ' ' && linhaCompleta[i] != '\n' && linhaCompleta[i] != '\r')
@@ -122,7 +122,7 @@ void balanceamentoDosCaracteresPorDensidade(int **&matrizPixels, int matrizInfo[
 void escreverNoArquivoFinal(char *nomeArquivo, char **&caracteresBalanceados, int matrizInfo[2])
 {
     ofstream arquivoDeEscrita(nomeArquivo, ios::binary);
-    char matrizInfoString[9] = (char *)(matrizInfo[0] + ' ' + matrizInfo[1]);
+    // char matrizInfoString[9] = (char *)(matrizInfo[0] + ' ' + matrizInfo[1]);
 
     if (!arquivoDeEscrita)
     {
@@ -130,7 +130,7 @@ void escreverNoArquivoFinal(char *nomeArquivo, char **&caracteresBalanceados, in
         exit(-1);
     }
 
-    arquivoDeEscrita.write((char *)matrizInfoString, 9);
+    // arquivoDeEscrita.write((char *)matrizInfoString, 9);
     for (int i = 0; i < matrizInfo[0]; i++)
     {
         arquivoDeEscrita.write(caracteresBalanceados[i], matrizInfo[1]);
@@ -148,11 +148,14 @@ int main(int argc, char *argv[])
     char **caracteresBalanceados;
     int matrizInfo[2] = {0, 0}; // primeira dimensão é o número de linhas, a segunda é o número de colunas
 
-    ifstream arquivoDeLeitura(argv[1], ios::binary);
+    char nomeArquivo[19] = "exemplos/img0.foo";
+    char nomeArquivoResultado[19] = "exemplos/img7.foo";
+
+    ifstream arquivoDeLeitura(nomeArquivo, ios::binary);
 
     if (!arquivoDeLeitura)
     {
-        cerr << "Erro abrindo o arquivo de origem: " << argv[1] << endl;
+        cerr << "Erro abrindo o arquivo de origem: " << nomeArquivo << endl;
         exit(-1);
     }
 
@@ -162,7 +165,7 @@ int main(int argc, char *argv[])
 
     balanceamentoDosCaracteresPorDensidade(matrizPixels, matrizInfo, caracteresBalanceados);
 
-    escreverNoArquivoFinal(argv[2], caracteresBalanceados, matrizInfo);
+    escreverNoArquivoFinal(nomeArquivoResultado, caracteresBalanceados, matrizInfo);
 
     return 0;
 }
