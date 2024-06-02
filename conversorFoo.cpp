@@ -38,9 +38,10 @@ void pegarNumeroDeLinhasEColunas(ifstream &arquivoDeLeitura, int matrizInfo[2])
     cout << "Numero de colunas: " << matrizInfo[1] << endl;
 }
 
-void lerConteudoDoArquivoOrigem(char *nomeArquivo, char **matrizPixels)
+void lerConteudoDoArquivoOrigem(char *nomeArquivo, int **matrizPixels)
 {
     int matrizInfo[2] = {0, 0}; // primeira dimensão é o número de linhas, a segunda é o número de colunas
+    char **matrizCharacteres;
 
     ifstream arquivoDeLeitura(nomeArquivo, ios::binary);
 
@@ -52,27 +53,30 @@ void lerConteudoDoArquivoOrigem(char *nomeArquivo, char **matrizPixels)
 
     pegarNumeroDeLinhasEColunas(arquivoDeLeitura, matrizInfo);
 
-    matrizPixels = new char *[matrizInfo[0]];
+    matrizCharacteres = new char *[matrizInfo[0]];
     for (int i = 0; i < matrizInfo[0]; i++)
     {
-        matrizPixels[i] = new char[matrizInfo[1]];
-        arquivoDeLeitura.read((char *)matrizPixels[i], matrizInfo[1]);
+        matrizCharacteres[i] = new char[matrizInfo[1]];
+        arquivoDeLeitura.read((char *)matrizCharacteres[i], matrizInfo[1]);
     }
 
+    matrizPixels = new int *[matrizInfo[0]];
     for (int i = 0; i < matrizInfo[0]; i++)
     {
+        matrizPixels[i] = new int[matrizInfo[1]];
         for (int j = 0; j < matrizInfo[1]; j++)
         {
-            cout << matrizPixels[i][j];
+            matrizPixels[i][j] = (unsigned int)matrizCharacteres[i][j];
         }
+        delete matrizCharacteres[i];
     }
 
-    delete matrizPixels[matrizInfo[0]];
+    delete matrizCharacteres;
 
     arquivoDeLeitura.close();
 }
 
-void escreverNoArquivoFinal(char *nomeArquivo, char **matrizPixels)
+void escreverNoArquivoFinal(char *nomeArquivo, int **matrizPixels)
 {
     ofstream arquivoDeEscrita(nomeArquivo, ios::binary);
 
@@ -81,14 +85,14 @@ void escreverNoArquivoFinal(char *nomeArquivo, char **matrizPixels)
 
 int main(int argc, char *argv[])
 {
-    char **matrizPixels;
+    int **matrizPixels;
 
     char nomeArquivo[19] = "exemplos/img0.foo";
 
     cout << nomeArquivo << endl;
     lerConteudoDoArquivoOrigem(nomeArquivo, matrizPixels);
 
-    escreverNoArquivoFinal(argv[2], matrizPixels);
+    // escreverNoArquivoFinal(argv[2], matrizPixels);
 
     return 0;
 }
