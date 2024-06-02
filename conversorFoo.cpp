@@ -13,7 +13,7 @@ void pegarNumeroDeLinhasEColunas(ifstream &arquivoDeLeitura, int matrizInfo[2])
     char linhaCompleta[9];
     string buffer = "";
 
-    arquivoDeLeitura.read((char *)&linhaCompleta, 9);
+    arquivoDeLeitura.read((char *)&linhaCompleta, 50);
     for (int i = 0; i < 9; i++)
     {
         if (linhaCompleta[i] != ' ' && linhaCompleta[i] != '\n' && linhaCompleta[i] != '\r')
@@ -42,6 +42,7 @@ void lerConteudoDoArquivoOrigem(ifstream &arquivoDeLeitura, int **&matrizPixels,
 {
     unsigned char **matrizCaracteres;
 
+    arquivoDeLeitura.seekg(1);
     matrizCaracteres = new unsigned char *[matrizInfo[0]];
     for (int i = 0; i < matrizInfo[0]; i++)
     {
@@ -57,9 +58,9 @@ void lerConteudoDoArquivoOrigem(ifstream &arquivoDeLeitura, int **&matrizPixels,
         {
             matrizPixels[i][j] = (unsigned int)matrizCaracteres[i][j];
         }
-        delete matrizCaracteres[i];
+        delete[] matrizCaracteres[i];
     }
-    delete matrizCaracteres;
+    delete[] matrizCaracteres;
 
     arquivoDeLeitura.close();
 }
@@ -113,21 +114,30 @@ void balanceamentoDosCaracteresPorDensidade(int **&matrizPixels, int matrizInfo[
                 caracteresBalanceados[i][j] = '*';
             }
         }
-        delete matrizPixels[i];
+        delete[] matrizPixels[i];
     }
-    delete matrizPixels;
+    delete[] matrizPixels;
 }
 
 void escreverNoArquivoFinal(char *nomeArquivo, char **&caracteresBalanceados, int matrizInfo[2])
 {
     ofstream arquivoDeEscrita(nomeArquivo, ios::binary);
+    char matrizInfoString[9] = (char *)(matrizInfo[0] + ' ' + matrizInfo[1]);
 
+    if (!arquivoDeEscrita)
+    {
+        cerr << "Erro abrindo o arquivo de escrita: " << nomeArquivo << endl;
+        exit(-1);
+    }
+
+    arquivoDeEscrita.write((char *)matrizInfoString, 9);
     for (int i = 0; i < matrizInfo[0]; i++)
     {
         arquivoDeEscrita.write(caracteresBalanceados[i], matrizInfo[1]);
-        delete caracteresBalanceados[i];
+        arquivoDeEscrita << endl;
+        delete[] caracteresBalanceados[i];
     }
-    delete caracteresBalanceados;
+    delete[] caracteresBalanceados;
 
     arquivoDeEscrita.close();
 }
@@ -137,14 +147,12 @@ int main(int argc, char *argv[])
     int **matrizPixels;
     char **caracteresBalanceados;
     int matrizInfo[2] = {0, 0}; // primeira dimensão é o número de linhas, a segunda é o número de colunas
-    char nomeArquivo[19] = "exemplos/img0.foo";
-    char nomeArquivoResultado[19] = "exemplos/img7.foo";
 
-    ifstream arquivoDeLeitura(nomeArquivo, ios::binary);
+    ifstream arquivoDeLeitura(argv[1], ios::binary);
 
     if (!arquivoDeLeitura)
     {
-        std::cerr << "Erro abrindo o arquivo: " << nomeArquivo << std::endl;
+        cerr << "Erro abrindo o arquivo de origem: " << argv[1] << endl;
         exit(-1);
     }
 
@@ -154,7 +162,7 @@ int main(int argc, char *argv[])
 
     balanceamentoDosCaracteresPorDensidade(matrizPixels, matrizInfo, caracteresBalanceados);
 
-    escreverNoArquivoFinal(nomeArquivoResultado, caracteresBalanceados, matrizInfo);
+    escreverNoArquivoFinal(argv[2], caracteresBalanceados, matrizInfo);
 
     return 0;
 }
