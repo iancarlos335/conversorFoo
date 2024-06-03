@@ -8,10 +8,10 @@
 #include <fstream>
 using namespace std;
 
-void pegarNumeroDeLinhasEColunas(ifstream &arquivoDeLeitura, int matrizInfo[2])
+void pegarDimensoesDaImagem(ifstream &arquivoDeLeitura, int matrizInfo[2])
 {
     char linhaCompleta[9];
-    string buffer = "";
+    string buffer = ""; // buffer para capturar as informações da imagem e contruir a futura matriz de pixels
 
     arquivoDeLeitura.read((char *)&linhaCompleta, 9);
     for (int i = 0; i < 9; i++)
@@ -42,9 +42,11 @@ void lerConteudoDoArquivoOrigem(ifstream &arquivoDeLeitura, int **&matrizPixels,
 {
     unsigned char **matrizCaracteres;
 
+    // Le as dimensões da imagem e coloca num vetor de char
     arquivoDeLeitura.seekg(0);
     arquivoDeLeitura.read((char *)dimensoesImagem, 8);
 
+    // Le o conteúdo da imagem e alimenta a matriz de pixels
     matrizCaracteres = new unsigned char *[matrizInfo[0]];
     for (int i = 0; i < matrizInfo[0]; i++)
     {
@@ -69,6 +71,7 @@ void lerConteudoDoArquivoOrigem(ifstream &arquivoDeLeitura, int **&matrizPixels,
 
 void balanceamentoDosCaracteresPorDensidade(int **&matrizPixels, int matrizInfo[2], char **&caracteresBalanceados)
 {
+    // Encontro a densidade dos pixels presentes na matriz e atribuo um caractere específico dentro dos intervalos definidos
     caracteresBalanceados = new char *[matrizInfo[0]];
     for (int i = 0; i < matrizInfo[0]; i++)
     {
@@ -131,7 +134,10 @@ void escreverNoArquivoFinal(char *nomeArquivo, char **&caracteresBalanceados, in
         exit(-1);
     }
 
+    // Escrevo as dimensões da imagem no arquivo de saída
     arquivoDeEscrita.write((char *)dimensoesImagem, 8);
+
+    // Escrevo a matriz de caracteres balanceados no arquivo de saída
     for (int i = 0; i < matrizInfo[0]; i++)
     {
         arquivoDeEscrita.write(caracteresBalanceados[i], matrizInfo[1]);
@@ -158,7 +164,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    pegarNumeroDeLinhasEColunas(arquivoDeLeitura, matrizInfo);
+    pegarDimensoesDaImagem(arquivoDeLeitura, matrizInfo);
 
     lerConteudoDoArquivoOrigem(arquivoDeLeitura, matrizPixels, matrizInfo, dimensoesImagem);
 
